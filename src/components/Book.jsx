@@ -63,7 +63,7 @@ pageGeometry.setAttribute("skinWeight", new Float32BufferAttribute(skinWeights, 
 const coverGeometry = pageGeometry.clone();
 coverGeometry.scale(1, 1, COVER_DEPTH / PAGE_DEPTH);
 const whiteColor = new Color("white");
-const emissiveColor = new Color("white");
+const emissiveColor = new Color("#7be88f");
 
 const pageMaterials = [
   new MeshStandardMaterial({
@@ -179,7 +179,8 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
     if (!skinnedMeshRef.current) {
       return;
     }
-    const emissiveIntensity = highlighted ? 0.22 : 0;
+    const isCover = number === 0 || number === pages.length - 1;
+    const emissiveIntensity = isCover && highlighted ? 0.22 : 0;
     skinnedMeshRef.current.material[4].emissiveIntensity =
       skinnedMeshRef.current.material[5].emissiveIntensity = MathUtils.lerp(
         skinnedMeshRef.current.material[4].emissiveIntensity,

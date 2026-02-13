@@ -531,7 +531,12 @@ export const Experience = () => {
         color={ORB_LIGHT_COLOR}
         castShadow
       />
-      <OrbitControls target={[0, -0.2, 0]} />
+      <OrbitControls
+        target={[0, -0.2, 0]}
+        enableZoom={false}
+        minPolarAngle={Math.PI / 2}
+        maxPolarAngle={Math.PI / 2}
+      />
       <Environment preset="studio" intensity={0.2}></Environment>
       <directionalLight
         position={[0, ORB_GROUP_Y + 3.5, 0]}
