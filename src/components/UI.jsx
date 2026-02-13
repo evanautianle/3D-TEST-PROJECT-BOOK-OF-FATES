@@ -1,22 +1,12 @@
 import { atom, useAtom } from "jotai";
 
 const pictures = [
-  "DSC00680",
-  "DSC00933",
-  "DSC00966",
-  "DSC00983",
-  "DSC01011",
-  "DSC01040",
-  "DSC01064",
-  "DSC01071",
-  "DSC01103",
-  "DSC01145",
-  "DSC01420",
-  "DSC01461",
-  "DSC01489",
-  "DSC02031",
-  "DSC02064",
-  "DSC02069",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
 ];
 
 export const pageAtom = atom(0);
@@ -47,7 +37,7 @@ export const UI = () => {
         <a
           className="pointer-events-auto mt-10 ml-10"
         >
-          <img className="w-20" src="#.png" />
+          <img className="w-20" src="/textures/book-cover.jpg" />
         </a>
         <div className="w-full overflow-auto pointer-events-auto flex justify-center">
           <div className="overflow-auto flex items-center gap-4 max-w-full p-10">
