@@ -1,5 +1,9 @@
 import { atom, useAtom } from "jotai";
 
+// Atom to control zoom/fullscreen state
+// Numeric zoom state: 1 = zoomed in, 0 = zoomed out
+export const zoomAtom = atom(0);
+
 const pictures = [
   "1",
   "2",
@@ -40,6 +44,7 @@ pages.push({
 
 export const UI = () => {
   const [page, setPage] = useAtom(pageAtom);
+  const [, setZoom] = useAtom(zoomAtom);
 
   return (
     <>
@@ -59,7 +64,15 @@ export const UI = () => {
                     ? "bg-white/90 text-black"
                     : "bg-black/30 text-white"
                 }`}
-                onClick={() => setPage(index)}
+                onClick={() => {
+                  setPage(index);
+                  // Zoom if not cover, else reset zoom
+                  if (index === 0 || index === pages.length) {
+                    setZoom(0);
+                  } else {
+                    setZoom(1);
+                  }
+                }}
               >
                 {index === 0 ? "Cover" : `Page ${index}`}
               </button>
@@ -70,7 +83,10 @@ export const UI = () => {
                   ? "bg-white/90 text-black"
                   : "bg-black/30 text-white"
               }`}
-              onClick={() => setPage(pages.length)}
+              onClick={() => {
+                setPage(pages.length);
+                setZoom(0);
+              }}
             >
               Back Cover
             </button>

@@ -241,6 +241,8 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
   const [highlighted, setHighlighted] = useState(false);
   useCursor(highlighted);
 
+  // ...existing code...
+  // Remove onClick logic here, as UI handles zoom/page logic
   return (
     <group
       {...props}
@@ -251,11 +253,6 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
       }}
       onPointerLeave={(e) => {
         e.stopPropagation();
-        setHighlighted(false);
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        setPage(opened ? number : number + 1);
         setHighlighted(false);
       }}
     >
@@ -286,6 +283,7 @@ export const Book = ({ ...props }) => {
             },
             Math.abs(page - delayedPage) > 2 ? 50 : 150
           );
+          // Always step by 1, even for last page (back cover)
           if (page > delayedPage) {
             return delayedPage + 1;
           }

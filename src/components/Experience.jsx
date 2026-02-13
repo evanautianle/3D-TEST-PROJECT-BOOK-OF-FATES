@@ -1,6 +1,8 @@
 import { Environment, Float, OrbitControls, useTexture } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useMemo, useRef, useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import { zoomAtom, pageAtom, pages } from "./UI";
 import { CanvasTexture, LinearFilter } from "three";
 import { Book } from "./Book";
 
@@ -421,6 +423,17 @@ const Background = () => {
   );
 };
 export const Experience = () => {
+  const { camera } = useThree();
+  const [zoomTarget] = useAtom(zoomAtom);
+  const [page] = useAtom(pageAtom);
+  // Internal lerped zoom value for smooth transitions
+  const zoomLerp = useRef(0);
+  // OrbitControls ref
+  const controlsRef = useRef();
+  // Easing function for more natural feel
+  function easeInOut(t) {
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  }
   const mistAlpha = useMemo(() => {
     const size = 512;
     const canvas = document.createElement("canvas");
@@ -447,6 +460,33 @@ export const Experience = () => {
     texture.needsUpdate = true;
     return texture;
   }, []);
+
+  // Camera zoom effect
+  // Smooth camera zoom/position
+  useFrame(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+    const lerpSpeed = 0.045;
+    zoomLerp.current += (zoomTarget - zoomLerp.current) * lerpSpeed;
+    if (Math.abs(zoomTarget - zoomLerp.current) < 0.001) zoomLerp.current = zoomTarget;
+    const easedZoom = easeInOut(zoomLerp.current);
+    const defaultDistance = 6.5;
+    const zoomDistance = 3.2;
+    const distance = defaultDistance + (zoomDistance - defaultDistance) * easedZoom;
+    // move camera forward/back along view direction
+    const dir = controls.object.position.clone().sub(controls.target).normalize();
+    controls.object.position.copy(controls.target.clone().add(dir.multiplyScalar(distance)));
+    controls.update();
+    const defaultFov = 45;
+    const zoomFov = 22;
+    camera.fov = defaultFov + (zoomFov - defaultFov) * easedZoom;
+    camera.updateProjectionMatrix();
+  });
+
+  // Dynamically control OrbitControls polar angles
+  const restrictPolar = zoomLerp.current < 0.5;
+  const minPolar = restrictPolar ? Math.PI / 2 : 0;
+  const maxPolar = restrictPolar ? Math.PI / 2 : Math.PI;
 
   return (
     <>
@@ -532,10 +572,12 @@ export const Experience = () => {
         castShadow
       />
       <OrbitControls
+        ref={controlsRef}
+        key="main-orbit-controls"
         target={[0, -0.2, 0]}
         enableZoom={false}
-        minPolarAngle={Math.PI / 2}
-        maxPolarAngle={Math.PI / 2}
+        minPolarAngle={minPolar}
+        maxPolarAngle={maxPolar}
       />
       <Environment preset="studio" intensity={0.2}></Environment>
       <directionalLight
