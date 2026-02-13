@@ -19,7 +19,8 @@ import {
 import { degToRad } from "three/src/math/MathUtils.js";
 import { pageAtom, pages } from "./UI";
 
-const lerpFactor = 0.05;
+const easingFactor = 0.5;
+const insideCurveStrength = 0.18;
 const PAGE_WIDTH = 1.28;
 const PAGE_HEGHT = 1.71;
 const PAGE_DEPTH = 0.003;
@@ -27,7 +28,6 @@ const PAGE_SEGMENTS = 30;
 const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS;
 const HALF_PAGE_WIDTH = PAGE_WIDTH / 2;
 const whiteColor = "#ffffff";
-
 
 pages.forEach((page) => {
   useTexture.preload(`/textures/${page.front}.jpg`);
@@ -133,20 +133,27 @@ const Page = ({number, front, back, page, opened, bookClosed, ...props}) => {
     }, [number, picture, picture2, pictureRoughness]); // Add dependencies
 
 
-    useFrame(() => {
-        if (!skinnedMeshRef.current) return;
+    useFrame((_, delta) => {
+        if (!skinnedMeshRef.current || !group.current) return;
         let targetRotation = opened ? -Math.PI/2 : Math.PI/2;
         if (!bookClosed) {
             targetRotation += degToRad(number*0.8);
         }
+
         const bones = skinnedMeshRef.current.skeleton.bones;
-        bones[0].rotation.y = MathUtils.lerp(bones[0].rotation.y, targetRotation, lerpFactor);
+        for (let i = 0; i < bones.length; i++) {
+            const target = i === 0 ? group.current : bones[i];
+            const insideCurveIntensity = i < 8 ? Math.sin(i * 0.2 + 0.25) : 0;
+            let rotationAngle = insideCurveStrength * insideCurveIntensity *targetRotation;
+            easing.dampAngle(target.rotation, "y", rotationAngle, easingFactor, delta);
+        }
+       
     })
 
     return (
-        <group {...props}>
+        <group {...props} ref={group}>
             <primitive object={manualSkinnedMesh} ref={skinnedMeshRef} 
-            position-z = {-number * PAGE_DEPTH + page * PAGE_DEPTH}
+            position-z = {(-number * PAGE_DEPTH + page * PAGE_DEPTH) * 10}
             />
         </group>
     )
