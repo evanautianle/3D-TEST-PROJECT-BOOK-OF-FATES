@@ -12,6 +12,13 @@ const RIM_HEIGHT = 0.12;
 const WALKWAY_WIDTH = 1.0;
 const WALKWAY_LENGTH = 6.0;
 const WALKWAY_HEIGHT = 0.08;
+const WALKWAY_Z = BASE_RADIUS + WALKWAY_LENGTH / 2 - 0.1;
+const WALKWAY_SIDE_WIDTH = 0.12;
+const WALKWAY_RAIL_HEIGHT = 0.12;
+const WALKWAY_INSET_WIDTH = WALKWAY_WIDTH * 0.72;
+const WALKWAY_INSET_HEIGHT = 0.04;
+const WALKWAY_STEP_LENGTH = 0.9;
+const WALKWAY_STEP_HEIGHT = 0.06;
 const PILLAR_RING_OFFSETS_LEFT = [-2.7, -1.35, -0.1, 1.1, 2.6];
 const PILLAR_RING_OFFSETS_RIGHT = [-2.2, -0.6, 0.7, 2.1, 3.0];
 const PILLAR_GLOW_OFFSETS_LEFT = [-2.0, -0.3, 1.4, 2.9];
@@ -108,13 +115,43 @@ export const Experience = () => {
           <cylinderGeometry args={[BASE_RADIUS * 1.08, BASE_RADIUS * 1.08, RIM_HEIGHT, 64]} />
           <meshStandardMaterial color="#123025" roughness={0.6} metalness={0.1} />
         </mesh>
-        <mesh
-          position={[0, BASE_Y + WALKWAY_HEIGHT / 2, BASE_RADIUS + WALKWAY_LENGTH / 2 - 0.1]}
-          receiveShadow
-        >
-          <boxGeometry args={[WALKWAY_WIDTH, WALKWAY_HEIGHT, WALKWAY_LENGTH]} />
-          <meshStandardMaterial color="#0e2a22" roughness={0.65} metalness={0.08} />
-        </mesh>
+        <group>
+          <mesh position={[0, BASE_Y + WALKWAY_HEIGHT / 2, WALKWAY_Z]} receiveShadow>
+            <boxGeometry args={[WALKWAY_WIDTH, WALKWAY_HEIGHT, WALKWAY_LENGTH]} />
+            <meshStandardMaterial color="#0e2a22" roughness={0.65} metalness={0.08} />
+          </mesh>
+          <mesh position={[0, BASE_Y + WALKWAY_HEIGHT / 2 + 0.02, WALKWAY_Z]} receiveShadow>
+            <boxGeometry args={[WALKWAY_INSET_WIDTH, WALKWAY_INSET_HEIGHT, WALKWAY_LENGTH * 0.92]} />
+            <meshStandardMaterial
+              color="#163a2d"
+              emissive="#4bffbf"
+              emissiveIntensity={0.25}
+              roughness={0.35}
+              metalness={0.12}
+            />
+          </mesh>
+          <mesh
+            position={[WALKWAY_WIDTH / 2 - WALKWAY_SIDE_WIDTH / 2, BASE_Y + WALKWAY_RAIL_HEIGHT / 2, WALKWAY_Z]}
+            receiveShadow
+          >
+            <boxGeometry args={[WALKWAY_SIDE_WIDTH, WALKWAY_RAIL_HEIGHT, WALKWAY_LENGTH * 0.98]} />
+            <meshStandardMaterial color="#0b1f1a" roughness={0.7} metalness={0.08} />
+          </mesh>
+          <mesh
+            position={[-WALKWAY_WIDTH / 2 + WALKWAY_SIDE_WIDTH / 2, BASE_Y + WALKWAY_RAIL_HEIGHT / 2, WALKWAY_Z]}
+            receiveShadow
+          >
+            <boxGeometry args={[WALKWAY_SIDE_WIDTH, WALKWAY_RAIL_HEIGHT, WALKWAY_LENGTH * 0.98]} />
+            <meshStandardMaterial color="#0b1f1a" roughness={0.7} metalness={0.08} />
+          </mesh>
+          <mesh
+            position={[0, BASE_Y + WALKWAY_STEP_HEIGHT / 2, BASE_RADIUS + WALKWAY_STEP_LENGTH / 2 + 0.05]}
+            receiveShadow
+          >
+            <boxGeometry args={[WALKWAY_WIDTH * 0.92, WALKWAY_STEP_HEIGHT, WALKWAY_STEP_LENGTH]} />
+            <meshStandardMaterial color="#0b1f1a" roughness={0.7} metalness={0.05} />
+          </mesh>
+        </group>
       </group>
 
       <group>
