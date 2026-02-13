@@ -30,7 +30,8 @@ const PAGE_DEPTH = 0.003;
 const PAGE_SEGMENTS = 30;
 const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS;
 const HALF_PAGE_WIDTH = PAGE_WIDTH / 2;
-const whiteColor = "#ffffff";
+const whiteColor = new Color("white");
+const emissiveColor = new Color("orange");
 
 pages.forEach((page) => {
   useTexture.preload(`/textures/${page.front}.jpg`);
@@ -116,6 +117,8 @@ const Page = ({number, front, back, page, opened, bookClosed, ...props}) => {
                     : {
                         roughness: 0.1,
                     }),
+                    emissive : emissiveColor,
+                    emissiveIntensity: 0,
             }),
             new MeshStandardMaterial({
                 color: whiteColor,
@@ -128,6 +131,8 @@ const Page = ({number, front, back, page, opened, bookClosed, ...props}) => {
                     : {
                         roughness: 0.1,
                     }),
+                                        emissive : emissiveColor,
+                    emissiveIntensity: 0,
             }),
         ];
         const mesh = new SkinnedMesh(pageGeometry, materials);
@@ -142,7 +147,13 @@ const Page = ({number, front, back, page, opened, bookClosed, ...props}) => {
 
     useFrame((_, delta) => {
         if (!skinnedMeshRef.current || !group.current) return;
-
+    const emissiveIntensity = highlighted ? 0.22 : 0;
+    skinnedMeshRef.current.material[4].emissiveIntensity =
+      skinnedMeshRef.current.material[5].emissiveIntensity = MathUtils.lerp(
+        skinnedMeshRef.current.material[4].emissiveIntensity,
+        emissiveIntensity,
+        0.1
+      );
         if (lastOpened.current !== opened) {
             turnedAt.current = +new Date();
             lastOpened.current = opened;
@@ -182,14 +193,36 @@ const Page = ({number, front, back, page, opened, bookClosed, ...props}) => {
        
     })
 
-    return (
-        <group {...props} ref={group}>
-            <primitive object={manualSkinnedMesh} ref={skinnedMeshRef} 
-            position-z = {(-number * PAGE_DEPTH + page * PAGE_DEPTH) * 10}
-            />
-        </group>
-    )
-}
+    const [_, setPage] = useAtom(pageAtom);
+    const [highlighted, setHighlighted] = useState(false);
+    useCursor(highlighted);
+
+  return (
+    <group
+      {...props}
+      ref={group}
+      onPointerEnter={(e) => {
+        e.stopPropagation();
+        setHighlighted(true);
+      }}
+      onPointerLeave={(e) => {
+        e.stopPropagation();
+        setHighlighted(false);
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        setPage(opened ? number : number + 1);
+        setHighlighted(false);
+      }}
+    >
+      <primitive
+        object={manualSkinnedMesh}
+        ref={skinnedMeshRef}
+        position-z={-number * PAGE_DEPTH + page * PAGE_DEPTH}
+      />
+    </group>
+  );
+};
 
 export const Book = ({...props}) => {
     const [page, setPage] = useAtom(pageAtom);
