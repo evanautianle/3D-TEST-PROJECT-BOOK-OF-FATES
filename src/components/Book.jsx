@@ -27,9 +27,11 @@ const turningCurveStrength = 0.09;
 const PAGE_WIDTH = 1.28;
 const PAGE_HEIGHT = 1.71;
 const PAGE_DEPTH = 0.003;
+const COVER_DEPTH = 0.05;
 const PAGE_SEGMENTS = 30;
 const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS;
 
+// Shared skinned page geometry (one-time setup)
 const pageGeometry = new BoxGeometry(
   PAGE_WIDTH,
   PAGE_HEIGHT,
@@ -46,6 +48,7 @@ const skinIndexes = [];
 const skinWeights = [];
 
 for (let i = 0; i < position.count; i++) {
+  // Assign each vertex to two neighboring bones for smooth bending
   vertex.fromBufferAttribute(position, i);
   const x = vertex.x;
   const skinIndex = Math.max(0, Math.floor(x / SEGMENT_WIDTH));
@@ -56,6 +59,9 @@ for (let i = 0; i < position.count; i++) {
 
 pageGeometry.setAttribute("skinIndex", new Uint16BufferAttribute(skinIndexes, 4));
 pageGeometry.setAttribute("skinWeight", new Float32BufferAttribute(skinWeights, 4));
+
+const coverGeometry = pageGeometry.clone();
+coverGeometry.scale(1, 1, COVER_DEPTH / PAGE_DEPTH);
 const whiteColor = new Color("white");
 const emissiveColor = new Color("orange");
 
@@ -74,6 +80,22 @@ const pageMaterials = [
   }),
 ];
 
+const coverMaterials = [
+  new MeshStandardMaterial({
+    color: "#f2ede3",
+  }),
+  new MeshStandardMaterial({
+    color: "#1a1a1a",
+  }),
+  new MeshStandardMaterial({
+    color: "#f2ede3",
+  }),
+  new MeshStandardMaterial({
+    color: "#f2ede3",
+  }),
+];
+
+// Per-page skinned mesh with unique textures
 pages.forEach((page) => {
   useTexture.preload(`/textures/${page.front}.jpg`);
   useTexture.preload(`/textures/${page.back}.jpg`);
@@ -110,8 +132,13 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
     }
     const skeleton = new Skeleton(bones);
 
+    const isCover = number === 0 || number === pages.length - 1;
+    const baseMaterials = isCover ? coverMaterials : pageMaterials;
+    const geometry = isCover ? coverGeometry : pageGeometry;
+
+    // Clone materials per page to avoid shared state
     const materials = [
-      ...pageMaterials,
+      ...baseMaterials,
       new MeshStandardMaterial({
         color: whiteColor,
         map: picture,
@@ -139,7 +166,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
         emissiveIntensity: 0,
       }),
     ];
-    const mesh = new SkinnedMesh(pageGeometry, materials);
+    const mesh = new SkinnedMesh(geometry, materials);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     mesh.frustumCulled = false;
@@ -174,6 +201,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
     const bones = skinnedMeshRef.current.skeleton.bones;
     for (let i = 0; i < bones.length; i++) {
       const target = i === 0 ? group.current : bones[i];
+      // Curvature profile across the page width
       const insideCurveIntensity = i < 8 ? Math.sin(i * 0.2 + 0.25) : 0;
       const outsideCurveIntensity = i >= 8 ? Math.cos(i * 0.3 + 0.09) : 0;
       const turningCurveIntensity =
@@ -208,9 +236,9 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
     }
   });
 
-    const [_, setPage] = useAtom(pageAtom);
-    const [highlighted, setHighlighted] = useState(false);
-    useCursor(highlighted);
+  const [_, setPage] = useAtom(pageAtom);
+  const [highlighted, setHighlighted] = useState(false);
+  useCursor(highlighted);
 
   return (
     <group
@@ -250,6 +278,7 @@ export const Book = ({ ...props }) => {
         if (page === delayedPage) {
           return delayedPage;
         } else {
+          // Step toward the target page for a flip animation
           timeout = setTimeout(
             () => {
               goToPage();
