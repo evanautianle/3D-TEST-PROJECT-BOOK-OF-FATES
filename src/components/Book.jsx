@@ -63,7 +63,7 @@ pageGeometry.setAttribute("skinWeight", new Float32BufferAttribute(skinWeights, 
 const coverGeometry = pageGeometry.clone();
 coverGeometry.scale(1, 1, COVER_DEPTH / PAGE_DEPTH);
 const whiteColor = new Color("white");
-const emissiveColor = new Color("orange");
+const emissiveColor = new Color("green");
 
 const pageMaterials = [
   new MeshStandardMaterial({
