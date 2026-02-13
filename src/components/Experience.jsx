@@ -9,7 +9,7 @@ const PILLAR_HEIGHT = 7.2;
 const PILLAR_RADIUS = 0.55;
 const PILLAR_Y = -2.2;
 const PILLAR_BOTTOM_EXTRA = 24.0;
-const BASE_Y = -1.2;
+const BASE_Y = -1.5;
 const BASE_RADIUS = 1.2;
 const BASE_HEIGHT = 0.35;
 const BASE_TOP_Y = BASE_Y + BASE_HEIGHT / 2;
@@ -38,9 +38,15 @@ const ORB_PARTICLE_COUNT = 28;
 const CITY_BOTTOM_EXTRA = 26.0;
 const FOG_COLOR = "#0f2a23";
 const FOG_DENSITY = 0.14;
-const MIST_Y = -4.4;
-const MIST_SIZE = 90;
-const MIST_OPACITY = 0.75;
+const MIST_Y = -4.2;
+const MIST_SIZE = 120;
+const MIST_OPACITY = 0.55;
+const ORB_LIGHT_OFFSET_Y = 1.4;
+const ORB_LIGHT_INTENSITY = 3.2;
+const ORB_LIGHT_DISTANCE = 18;
+const ORB_LIGHT_DECAY = 2.2;
+const ORB_LIGHT_COLOR = "#7dffd9";
+const AMBIENT_INTENSITY = 0.15;
 const PILLAR_RING_OFFSETS_LEFT = [-2.7, -1.35, -0.1, 1.1, 2.6];
 const PILLAR_RING_OFFSETS_RIGHT = [-2.2, -0.6, 0.7, 2.1, 3.0];
 const PILLAR_GLOW_OFFSETS_LEFT = [-2.0, -0.3, 1.4, 2.9];
@@ -265,7 +271,7 @@ const Background = () => {
 };
 export const Experience = () => {
   const mistAlpha = useMemo(() => {
-    const size = 256;
+    const size = 512;
     const canvas = document.createElement("canvas");
     canvas.width = size;
     canvas.height = size;
@@ -273,13 +279,13 @@ export const Experience = () => {
     const gradient = ctx.createRadialGradient(
       size / 2,
       size / 2,
-      size * 0.1,
+      0,
       size / 2,
       size / 2,
-      size * 0.5
+      size * 0.95
     );
-    gradient.addColorStop(0, "rgba(255, 255, 255, 0.9)");
-    gradient.addColorStop(0.6, "rgba(255, 255, 255, 0.4)");
+    gradient.addColorStop(0, "rgba(255, 255, 255, 0.95)");
+    gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.35)");
     gradient.addColorStop(1, "rgba(255, 255, 255, 0.0)");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, size, size);
@@ -364,11 +370,20 @@ export const Experience = () => {
       >
         <Book position-y={0.2} />
       </Float>
+      <ambientLight intensity={AMBIENT_INTENSITY} color="#0b1f1a" />
+      <pointLight
+        position={[0, ORB_GROUP_Y + ORB_LIGHT_OFFSET_Y, 0]}
+        intensity={ORB_LIGHT_INTENSITY}
+        distance={ORB_LIGHT_DISTANCE}
+        decay={ORB_LIGHT_DECAY}
+        color={ORB_LIGHT_COLOR}
+        castShadow
+      />
       <OrbitControls />
-      <Environment preset="studio"></Environment>
+      <Environment preset="studio" intensity={0.2}></Environment>
       <directionalLight
-        position={[2, 5, 2]}
-        intensity={2.5}
+        position={[0, ORB_GROUP_Y + 3.5, 0]}
+        intensity={1.1}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
