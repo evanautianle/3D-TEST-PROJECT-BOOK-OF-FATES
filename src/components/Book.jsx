@@ -81,19 +81,12 @@ const pageMaterials = [
 ];
 
 const coverMaterials = [
-  new MeshStandardMaterial({
-    color: "#f2ede3",
-  }),
-  new MeshStandardMaterial({
-    color: "#1a1a1a",
-  }),
-  new MeshStandardMaterial({
-    color: "#f2ede3",
-  }),
-  new MeshStandardMaterial({
-    color: "#f2ede3",
-  }),
+  new MeshStandardMaterial({ color: "#1f5f3a" }), // side 1
+  new MeshStandardMaterial({ color: "#1f5f3a" }), // side 2
+  new MeshStandardMaterial({ color: "#1f5f3a" }), // side 3
+  new MeshStandardMaterial({ color: "#1f5f3a" }), // side 4
 ];
+
 
 // Per-page skinned mesh with unique textures
 pages.forEach((page) => {
