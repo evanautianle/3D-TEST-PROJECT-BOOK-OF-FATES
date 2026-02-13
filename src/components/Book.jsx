@@ -150,7 +150,7 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
               roughness: 0.1,
             }),
         emissive: emissiveColor,
-        emissiveIntensity: 0,
+        emissiveIntensity: 0.05,
       }),
       new MeshStandardMaterial({
         color: whiteColor,

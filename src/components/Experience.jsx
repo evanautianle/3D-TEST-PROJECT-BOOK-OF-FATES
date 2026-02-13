@@ -479,7 +479,7 @@ useEffect(() => {
     const controls = controlsRef.current;
     if (!controls) return;
 
-    const lerpSpeed = 0.045;
+    const lerpSpeed = 0.01;
     zoomLerp.current += (zoomTarget - zoomLerp.current) * lerpSpeed;
 
     if (Math.abs(zoomTarget - zoomLerp.current) < 0.001)
@@ -491,7 +491,7 @@ useEffect(() => {
     // OFFSETS
     const defaultOffset = { x: -2.5, y: -0.2, z: 6.5 };
     // straight-on reading view (NOT tilted)
-    const zoomOffset = { x: 0, y: 1.8, z: 5 };
+    const zoomOffset = { x: 0, y: 1.8, z: 6 };
     const offset = {
       x: lerp(defaultOffset.x, zoomOffset.x, easedZoom),
       y: lerp(defaultOffset.y, zoomOffset.y, easedZoom),
@@ -538,7 +538,7 @@ useEffect(() => {
       <group>
         <mesh position={[0, BASE_Y, 0]} receiveShadow>
           <cylinderGeometry args={[BASE_RADIUS, BASE_RADIUS, BASE_HEIGHT, 64]} />
-          <meshStandardMaterial color={THEME_GREEN_DEEP} roughness={0.7} metalness={0.05} />
+          <meshStandardMaterial color="#0a1812" roughness={0.98} metalness={0.01} />
         </mesh>
         <mesh position={[0, BASE_Y + BASE_HEIGHT / 2 + RIM_HEIGHT / 2, 0]} receiveShadow>
           <cylinderGeometry args={[BASE_RADIUS * 1.08, BASE_RADIUS * 1.08, RIM_HEIGHT, 64]} />
@@ -605,10 +605,10 @@ useEffect(() => {
       >
         <Book position-y={0.2} />
       </Float>
-      <ambientLight intensity={AMBIENT_INTENSITY} color={THEME_GREEN_DEEP} />
+      <ambientLight intensity={0.025} color={THEME_GREEN_DEEP} />
       <pointLight
         position={[0, ORB_GROUP_Y + ORB_LIGHT_OFFSET_Y, 0]}
-        intensity={ORB_LIGHT_INTENSITY}
+        intensity={0.18}
         distance={ORB_LIGHT_DISTANCE}
         decay={ORB_LIGHT_DECAY}
         color={ORB_LIGHT_COLOR}
@@ -622,10 +622,10 @@ useEffect(() => {
   dampingFactor={0.08}
 />
 
-      <Environment preset="studio" intensity={0.2}></Environment>
+      <Environment preset="studio" intensity={0.04}></Environment>
       <directionalLight
         position={[0, ORB_GROUP_Y + 3.5, 0]}
-        intensity={1.1}
+        intensity={0.07}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
