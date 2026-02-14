@@ -59,7 +59,7 @@ const PILLAR_GLOW_OFFSETS_RIGHT = [-1.7, 0.4, 1.9, 2.7];
 const PILLAR_GLOW_THICKNESS = 0.06;
 
 const Pillar = ({ x, rings, glows, tilt }) => {
-  const pillarRoughness = useTexture("/textures/book-cover-roughness.jpg");
+  const pillarRoughness = useTexture("textures/book-cover-roughness.jpg");
 
   return (
     <group position={[x, 0, 0]} rotation-z={tilt}>
@@ -176,7 +176,7 @@ const Pillar = ({ x, rings, glows, tilt }) => {
 
 const Background = () => {
   const beamRef = useRef(null);
-  const pillarRoughness = useTexture("/textures/book-cover-roughness.jpg");
+  const pillarRoughness = useTexture("textures/book-cover-roughness.jpg");
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
