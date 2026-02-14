@@ -26,8 +26,7 @@ const outsideCurveStrength = 0.05;
 const turningCurveStrength = 0.09;
 const PAGE_WIDTH = 1.28;
 const PAGE_HEIGHT = 1.71;
-const PAGE_DEPTH = 0.015;
-const COVER_DEPTH = 0.025;
+const PAGE_DEPTH = 0.003;
 const PAGE_SEGMENTS = 30;
 const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS;
 
@@ -60,10 +59,7 @@ for (let i = 0; i < position.count; i++) {
 pageGeometry.setAttribute("skinIndex", new Uint16BufferAttribute(skinIndexes, 4));
 pageGeometry.setAttribute("skinWeight", new Float32BufferAttribute(skinWeights, 4));
 
-const coverGeometry = pageGeometry.clone();
-coverGeometry.scale(1, 1, COVER_DEPTH / PAGE_DEPTH);
 const whiteColor = new Color("white");
-const emissiveColor = new Color("#7be88f");
 
 const pageMaterials = [
   new MeshStandardMaterial({
@@ -78,13 +74,6 @@ const pageMaterials = [
   new MeshStandardMaterial({
     color: whiteColor,
   }),
-];
-
-const coverMaterials = [
-  new MeshStandardMaterial({ color: "#1f5f3a" }), // side 1
-  new MeshStandardMaterial({ color: "#1f5f3a" }), // side 2
-  new MeshStandardMaterial({ color: "#1f5f3a" }), // side 3
-  new MeshStandardMaterial({ color: "#1f5f3a" }), // side 4
 ];
 
 
@@ -125,13 +114,8 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
     }
     const skeleton = new Skeleton(bones);
 
-    const isCover = number === 0 || number === pages.length - 1;
-    const baseMaterials = isCover ? coverMaterials : pageMaterials;
-    const geometry = isCover ? coverGeometry : pageGeometry;
-
-    // Clone materials per page to avoid shared state
     const materials = [
-      ...baseMaterials,
+      ...pageMaterials,
       new MeshStandardMaterial({
         color: whiteColor,
         map: picture,
@@ -142,8 +126,6 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
           : {
               roughness: 0.1,
             }),
-        emissive: emissiveColor,
-        emissiveIntensity: 0.05,
       }),
       new MeshStandardMaterial({
         color: whiteColor,
@@ -155,31 +137,21 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
           : {
               roughness: 0.1,
             }),
-        emissive: emissiveColor,
-        emissiveIntensity: 0,
       }),
     ];
-    const mesh = new SkinnedMesh(geometry, materials);
+    const mesh = new SkinnedMesh(pageGeometry, materials);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     mesh.frustumCulled = false;
     mesh.add(skeleton.bones[0]);
     mesh.bind(skeleton);
     return mesh;
-  }, [number, picture, picture2, pictureRoughness]);
+  }, []);
 
   useFrame((_, delta) => {
     if (!skinnedMeshRef.current) {
       return;
     }
-    const isCover = number === 0 || number === pages.length - 1;
-    const emissiveIntensity = isCover && highlighted ? 0.22 : 0;
-    skinnedMeshRef.current.material[4].emissiveIntensity =
-      skinnedMeshRef.current.material[5].emissiveIntensity = MathUtils.lerp(
-        skinnedMeshRef.current.material[4].emissiveIntensity,
-        emissiveIntensity,
-        0.1
-      );
     if (lastOpened.current !== opened) {
       turnedAt.current = +new Date();
       lastOpened.current = opened;

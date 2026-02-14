@@ -175,19 +175,11 @@ const Pillar = ({ x, rings, glows, tilt }) => {
 };
 
 const Background = () => {
-  const orbRef = useRef(null);
-  const ringRef = useRef(null);
   const beamRef = useRef(null);
   const pillarRoughness = useTexture("/textures/book-cover-roughness.jpg");
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    if (orbRef.current) {
-      orbRef.current.material.emissiveIntensity = 0.85 + Math.sin(t * 1.2) * 0.18;
-    }
-    if (ringRef.current) {
-      ringRef.current.rotation.z = t * 0.12;
-    }
     if (beamRef.current) {
       beamRef.current.material.emissiveIntensity = 0.55 + Math.sin(t * 2.1) * 0.25;
     }
@@ -195,23 +187,6 @@ const Background = () => {
 
   return (
     <group>
-      <group position={[0, ORB_GROUP_Y, 0]}>
-        <mesh position={[0, 0, 0]} ref={orbRef}>
-          <sphereGeometry args={[0.95, 32, 32]} />
-          <meshStandardMaterial color="#040a07" emissive={THEME_GREEN_SOFT} emissiveIntensity={0.9} roughness={0.25} />
-        </mesh>
-
-        <mesh position={[0, -0.05, 0]} rotation-x={Math.PI / 2} ref={ringRef}>
-          <torusGeometry args={[2.8, 0.07, 24, 120]} />
-          <meshStandardMaterial color="#07120c" emissive={THEME_GREEN_SOFT} emissiveIntensity={0.6} roughness={0.4} />
-        </mesh>
-
-        <mesh position={[0, -1.0, 0]} rotation-x={Math.PI / 2}>
-          <torusGeometry args={[1.6, 0.04, 20, 90]} />
-          <meshStandardMaterial color="#07120c" emissive={THEME_GREEN} emissiveIntensity={0.4} roughness={0.5} />
-        </mesh>
-      </group>
-
       <group position={[0, BACKDROP_RING_Y, 0]}>
         {Array.from({ length: CITY_RING_COUNT }).map((_, index) => {
           const angle = (index / CITY_RING_COUNT) * Math.PI * 2;
@@ -584,6 +559,62 @@ useEffect(() => {
             <boxGeometry args={[WALKWAY_WIDTH * 0.92, WALKWAY_STEP_HEIGHT, WALKWAY_STEP_LENGTH]} />
             <meshStandardMaterial color={THEME_GREEN_DEEP} roughness={0.7} metalness={0.05} />
           </mesh>
+
+          {/* Two humanoid figures on the walkway facing the book */}
+          <group position={[-0.045, WALKWAY_BASE_Y + 0.07, WALKWAY_Z - WALKWAY_LENGTH * 0.38]} rotation-y={Math.PI}>
+            {/* Shadow plane for figure 1 */}
+            <mesh position={[0, -0.07, -0.09]} rotation-x={-Math.PI / 2} receiveShadow>
+              <planeGeometry args={[0.18, 0.09]} />
+              <shadowMaterial opacity={0.38} />
+            </mesh>
+            {/* Legs */}
+            <mesh position={[-0.018, 0.035, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[0.012, 0.012, 0.07, 12]} />
+              <meshStandardMaterial color="#111" />
+            </mesh>
+            <mesh position={[0.018, 0.035, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[0.012, 0.012, 0.07, 12]} />
+              <meshStandardMaterial color="#111" />
+            </mesh>
+            {/* Body */}
+            <mesh position={[0, 0.09, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[0.018, 0.022, 0.09, 14]} />
+              <meshStandardMaterial color="#222" />
+            </mesh>
+            {/* Arms */}
+            {/* Head */}
+            <mesh position={[0, 0.17, 0]} castShadow>
+              <sphereGeometry args={[0.018, 14, 14]} />
+              <meshStandardMaterial color="#000" />
+            </mesh>
+          </group>
+          <group position={[0.045, WALKWAY_BASE_Y + 0.07, WALKWAY_Z - WALKWAY_LENGTH * 0.38]} rotation-y={Math.PI}>
+            {/* Shadow plane for figure 2 */}
+            <mesh position={[0, -0.07, -0.09]} rotation-x={-Math.PI / 2} receiveShadow>
+              <planeGeometry args={[0.18, 0.09]} />
+              <shadowMaterial opacity={0.38} />
+            </mesh>
+            {/* Legs */}
+            <mesh position={[-0.018, 0.035, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[0.012, 0.012, 0.07, 12]} />
+              <meshStandardMaterial color="#111" />
+            </mesh>
+            <mesh position={[0.018, 0.035, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[0.012, 0.012, 0.07, 12]} />
+              <meshStandardMaterial color="#111" />
+            </mesh>
+            {/* Body */}
+            <mesh position={[0, 0.09, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[0.018, 0.022, 0.09, 14]} />
+              <meshStandardMaterial color="#222" />
+            </mesh>
+            {/* Arms */}
+            {/* Head */}
+            <mesh position={[0, 0.17, 0]} castShadow>
+              <sphereGeometry args={[0.018, 14, 14]} />
+              <meshStandardMaterial color="#000" />
+            </mesh>
+          </group>
         </group>
       </group>
 
@@ -609,15 +640,7 @@ useEffect(() => {
       >
         <Book position-y={0.2} />
       </Float>
-      <ambientLight intensity={0.025} color={THEME_GREEN_DEEP} />
-      <pointLight
-        position={[0, ORB_GROUP_Y + ORB_LIGHT_OFFSET_Y, 0]}
-        intensity={0.18}
-        distance={ORB_LIGHT_DISTANCE}
-        decay={ORB_LIGHT_DECAY}
-        color={ORB_LIGHT_COLOR}
-        castShadow
-      />
+      
 <OrbitControls
   ref={controlsRef}
   key="main-orbit-controls"
@@ -626,15 +649,16 @@ useEffect(() => {
   dampingFactor={0.08}
 />
 
-      <Environment preset="studio" intensity={0.04}></Environment>
+      <Environment preset="studio"></Environment>
       <directionalLight
-        position={[0, ORB_GROUP_Y + 3.5, 0]}
-        intensity={0.07}
+        position={[2, 5, 2]}
+        intensity={2.5}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-bias={-0.0001}
       />
+    
     </>
   );
 };
