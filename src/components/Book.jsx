@@ -30,6 +30,18 @@ const PAGE_DEPTH = 0.015;
 const COVER_DEPTH = 0.025;
 const PAGE_SEGMENTS = 30;
 const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS;
+const PAGE_SPACING = 1.5; // Multiplier for spacing to prevent overlap
+
+// Add spacing between pages to prevent overlap
+const getPageOffset = (pageNumber, totalPages) => {
+  if (pageNumber === 0) return 0; // Front cover at base
+  if (pageNumber === totalPages - 1) {
+    // Back cover: account for front cover + all pages in between
+    return (COVER_DEPTH + (totalPages - 2) * PAGE_DEPTH) * PAGE_SPACING;
+  }
+  // Regular pages: after front cover
+  return (COVER_DEPTH + (pageNumber - 1) * PAGE_DEPTH) * PAGE_SPACING;
+};
 
 // Shared skinned page geometry (one-time setup)
 const pageGeometry = new BoxGeometry(
@@ -249,20 +261,28 @@ const Page = ({ number, front, back, page, opened, bookClosed, ...props }) => {
       }}
       onClick={(e) => {
         e.stopPropagation();
-        // Turn the page and zoom in/out as with the UI buttons
-        setPage(opened ? number : number + 1);
-        setHighlighted(false);
-        if (number === 0 || number === pages.length - 1) {
-          setZoom(0);
-        } else {
-          setZoom(1);
+        
+        // Only allow clicking if this is the page that should be interactive
+        // Front page of unturned stack or back page of turned stack
+        if (!opened && number !== page) {
+          // This is a closed page but not the next one to turn
+          return;
         }
+        if (opened && number !== page - 1) {
+          // This is an open page but not the previous one
+          return;
+        }
+        
+        // Turn to this page
+        const targetPage = opened ? number : number + 1;
+        setPage(targetPage);
+        setHighlighted(false);
       }}
     >
       <primitive
         object={manualSkinnedMesh}
         ref={skinnedMeshRef}
-        position-z={-number * PAGE_DEPTH + page * PAGE_DEPTH}
+        position-z={-getPageOffset(number, pages.length) + getPageOffset(page, pages.length)}
       />
     </group>
   );
